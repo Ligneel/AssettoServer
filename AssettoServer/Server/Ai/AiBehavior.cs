@@ -178,7 +178,7 @@ namespace AssettoServer.Server.Ai
         private TrafficSplinePoint? GetSpawnPoint(EntryCar playerCar)
         {
             if (!_server.AiEnabled)
-                throw new InvalidOperationException("AI disabled");
+                throw new InvalidOperationException("Ai disabled");
             
             var targetPlayerSplinePos = _server.TrafficMap.WorldToSpline(playerCar.Status.Position);
 

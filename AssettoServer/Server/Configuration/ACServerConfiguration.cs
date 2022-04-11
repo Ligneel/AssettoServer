@@ -13,7 +13,7 @@ namespace AssettoServer.Server.Configuration;
 public class ACServerConfiguration
 {
     public ServerConfiguration Server { get; }
-    public EntryList EntryList { get; }
+    public EntryList EntryList { get; set; }//lig edit added set
     public IReadOnlyList<SessionConfiguration> Sessions { get; }
     public string FullTrackName { get; }
     public string WelcomeMessage { get; } = "";

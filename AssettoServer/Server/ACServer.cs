@@ -40,8 +40,6 @@ using Qmmands;
 using Newtonsoft.Json;
 using NodaTime;
 using NodaTime.Extensions;
-using SunCalcNet;
-using SunCalcNet.Model;
 
 namespace AssettoServer.Server
 {
@@ -56,7 +54,6 @@ namespace AssettoServer.Server
         [NotNull] public SessionState? CurrentSession { get; private set; }
         [NotNull] public WeatherData? CurrentWeather { get; private set; }
         public ZonedDateTime CurrentDateTime { get; set; }
-        public SunPosition? CurrentSunPosition { get; private set; }
         public GeoParams GeoParams { get; private set; } = new GeoParams();
         public IReadOnlyList<string> Features { get; private set; }
         public IMetricsRoot Metrics { get; }
@@ -65,11 +62,11 @@ namespace AssettoServer.Server
         public long StartTime64 { get; private set; }
         public long CurrentTime64 => Environment.TickCount64 - StartTime64;
 
-        internal ConcurrentDictionary<int, EntryCar> ConnectedCars { get; }
-        internal ConcurrentDictionary<Address, EntryCar> EndpointCars { get; }
-        public EntryCar[] EntryCars { get; }
+        public ConcurrentDictionary<int, EntryCar> ConnectedCars { get; set; }//lig edit added set and changed internal to public
+        public ConcurrentDictionary<Address, EntryCar> EndpointCars { get; set; }//lig edit added set and changed internal to public
+        public EntryCar[] EntryCars { get; set; } //lig eddit: added set
         internal GuidListFile Admins { get; }
-        internal GuidListFile Blacklist { get; }
+        public GuidListFile Blacklist { get; }//lig edit changed internal to set
         [NotNull] internal ImmutableDictionary<string, byte[]>? TrackChecksums { get; private set; }
         [NotNull] internal ImmutableDictionary<string, byte[]>? CarChecksums { get; private set; }
         internal CommandService CommandService { get; }
@@ -86,8 +83,8 @@ namespace AssettoServer.Server
         public DefaultWeatherProvider WeatherProvider { get; }
         public IWeatherImplementation WeatherImplementation { get; }
         private RainHelper RainHelper { get; }
-        private ITrackParamsProvider TrackParamsProvider { get; }
-        public TrackParams.TrackParams? TrackParams { get; }
+        public ITrackParamsProvider TrackParamsProvider { get; }//lig edit: modified private to public
+        public TrackParams.TrackParams? TrackParams { get; set; }//lig edit: added set
         
         public TrafficMap? TrafficMap { get; }
         public AiBehavior? AiBehavior { get; }
@@ -215,6 +212,7 @@ namespace AssettoServer.Server
 
             features.Add("SPECTATING_AWARE");
             features.Add("LOWER_CLIENTS_SENDING_RATE");
+            features.Add("FREQUENT_TRACK_CHANGES");//lig edit added that
 
             Features = features;
 
@@ -570,7 +568,7 @@ namespace AssettoServer.Server
             context.Cancel = true;
         }
 
-        private void OnBlacklistReloaded(GuidListFile sender, EventArgs e)
+        public void OnBlacklistReloaded(GuidListFile sender, EventArgs e)//lig edit changed private to public
         {
             foreach (var client in ConnectedCars.Values.Select(c => c.Client))
             {
@@ -584,7 +582,7 @@ namespace AssettoServer.Server
             }
         }
         
-        private void InitializeChecksums()
+        public void InitializeChecksums()//lig edit changed pivate to public
         {
             TrackChecksums = ChecksumsProvider.CalculateTrackChecksums(Configuration.Server.Track, Configuration.Server.TrackConfig);
             Log.Information("Initialized {Count} track checksums", TrackChecksums.Count);
@@ -726,7 +724,6 @@ namespace AssettoServer.Server
         public void SetTime(float time)
         {
             CurrentDateTime = CurrentDateTime.Date.AtStartOfDayInZone(CurrentDateTime.Zone).PlusSeconds((long)time);
-            UpdateSunPosition();
         }
         
         public void SendLapCompletedMessage(byte sessionId, int lapTime, int cuts, ACTcpClient? target = null)
@@ -903,8 +900,6 @@ namespace AssettoServer.Server
                             {
                                 CurrentDateTime += Duration.FromMilliseconds((Environment.TickCount64 - lastTimeUpdate) * Configuration.Server.TimeOfDayMultiplier);
                             }
-                            
-                            UpdateSunPosition();
 
                             RainHelper.Update(CurrentWeather, Configuration.Server.DynamicTrack?.BaseGrip ?? 1, Configuration.Extra.RainTrackGripReductionPercent, Environment.TickCount64 - lastTimeUpdate);
                             WeatherImplementation.SendWeather();
@@ -966,14 +961,6 @@ namespace AssettoServer.Server
                         Environment.Exit(1);
                     }
                 }
-            }
-        }
-
-        public void UpdateSunPosition()
-        {
-            if (TrackParams != null)
-            {
-                CurrentSunPosition = SunCalc.GetSunPosition(CurrentDateTime.ToDateTimeUtc(), TrackParams.Latitude, TrackParams.Longitude);
             }
         }
 

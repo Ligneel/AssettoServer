@@ -29,7 +29,7 @@ namespace AssettoServer.Server
             AiInit();
         }
 
-        public ACServer Server { get; }
+        public ACServer Server { get; set;}//lig edit : added set
         public ACTcpClient? Client { get; internal set; }
         public CarStatus Status { get; private set; } = new CarStatus();
 
@@ -40,27 +40,27 @@ namespace AssettoServer.Server
         public bool HasSentAfkWarning { get; internal set; }
         public bool HasUpdateToSend { get; internal set; }
         public int TimeOffset { get; internal set; }
-        public byte SessionId { get; }
+        public byte SessionId { get; set; }//lig edit: added set
         public uint LastRemoteTimestamp { get; internal set; }
         public int LastPingTime { get; internal set; }
         public int LastPongTime { get; internal set; }
         public ushort Ping { get; internal set; }
-        public DriverOptionsFlags DriverOptionsFlags { get; internal set; }
+        public DriverOptionsFlags DriverOptionsFlags { get; set; }//lig edit: modified internal set to set
 
         public bool IsSpectator { get; internal set; }
-        public string Model { get; }
-        public string Skin { get; }
-        public int SpectatorMode { get; internal set; }
-        public int Ballast { get; internal set; }
-        public int Restrictor { get; internal set; }
-        
-        public float NetworkDistanceSquared { get; internal set; }
-        public int OutsideNetworkBubbleUpdateRateMs { get; internal set; }
+        public string Model { get; set; }//lig edit: added set
+        public string Skin { get; set; }//lig edit: added set
+        public int SpectatorMode { get; set; }//lig edit: modified internal set to set
+        public int Ballast { get; set; }//lig edit: modified internal set to set
+        public int Restrictor { get; set; }//lig edit: modified internal set to set
 
-        internal long[] OtherCarsLastSentUpdateTime { get; }
+        public float NetworkDistanceSquared { get; set; }//lig edit: modified internal set to set
+        public int OutsideNetworkBubbleUpdateRateMs { get; set; }//lig edit: modified internal set to set
+
+        public long[] OtherCarsLastSentUpdateTime { get; set; }//lig edit: added set and changed internal to public
         internal EntryCar? TargetCar { get; set; }
         private long LastFallCheckTime{ get; set; }
-
+        
         /// <summary>
         /// Fires when a position update is received.
         /// </summary>
@@ -124,7 +124,7 @@ namespace AssettoServer.Server
 
             long timeAfk = Environment.TickCount64 - LastActiveTime;
             if (timeAfk > Server.Configuration.Extra.MaxAfkTimeMilliseconds)
-                _ = Server.KickAsync(Client, KickReason.Kicked, $"{Client?.Name} has been kicked for being AFK.");
+                _ = Server.KickAsync(Client, Network.Packets.Outgoing.KickReason.Kicked, $"{Client?.Name} has been kicked for being AFK.");
             else if (!HasSentAfkWarning && Server.Configuration.Extra.MaxAfkTimeMilliseconds - timeAfk < 60000)
             {
                 HasSentAfkWarning = true;

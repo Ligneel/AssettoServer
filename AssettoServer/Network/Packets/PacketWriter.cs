@@ -66,6 +66,14 @@ namespace AssettoServer.Network.Packets
             _writePosition += bytesWritten;
         }
 
+        //lig edit: added function to send online events in the form of strings
+        public void WriteStringWithoutLength(string? str, Encoding encoding)
+        {
+            str ??= string.Empty;
+            int bytesWritten = encoding.GetBytes(str, Buffer.Slice(_writePosition).Span);
+            _writePosition += bytesWritten;
+        }
+
         public void Write<T>(T value) where T : struct
         {
             WriteBytes(MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref value, 1)));

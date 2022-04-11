@@ -12,13 +12,13 @@ public class ServerConfiguration
     [IniField("SERVER", "NAME")] public string Name { get; set; } = "AssettoServer";
     [IniField("SERVER", "PASSWORD")] public string? Password { get; set; }
     [IniField("SERVER", "ADMIN_PASSWORD")] public string? AdminPassword { get; set; }
-    [IniField("SERVER", "MAX_CLIENTS")] public int MaxClients { get; init; }
+    [IniField("SERVER", "MAX_CLIENTS")] public int MaxClients { get; set; }//lig edit modified init to set
     [IniField("SERVER", "UDP_PORT")] public ushort UdpPort { get; init; } = 9600;
     [IniField("SERVER", "TCP_PORT")] public ushort TcpPort { get; init; } = 9600;
     [IniField("SERVER", "HTTP_PORT")] public int HttpPort { get; init; } = 8081;
     [IniField("SERVER", "CLIENT_SEND_INTERVAL_HZ")] public byte RefreshRateHz { get; init; } = 20;
-    [IniField("SERVER", "TRACK")] public string Track { get; init; } = "";
-    [IniField("SERVER", "CONFIG_TRACK")] public string TrackConfig { get; init; } = "";
+    [IniField("SERVER", "TRACK")] public string Track { get; set; } = "";//lig edit: changed init to set
+    [IniField("SERVER", "CONFIG_TRACK")] public string TrackConfig { get; set; } = "";//lig edit: changed init to set
     [IniField("SERVER", "SUN_ANGLE")] public float SunAngle { get; init; }
     [IniField("SERVER", "LOOP_MODE")] public bool Loop { get; init; }
     [IniField("SERVER", "MAX_BALLAST_KG")] public int MaxBallastKg { get; init; }
